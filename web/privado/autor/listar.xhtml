@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="titulo">Manutençao de Autors</ui:define>
+        <ui:define name="conteudo">
+            <h:form id="formListagem">
+                <p:messages/>
+                <p:commandButton value="Novo" actionListener="#{controleAutor.novo()}"
+                                 icon="ui-icon-plus" oncomplete="PF('dlg').show();"
+                                 update=":formEdicao"/>
+                 <div align="center">
+                    <p:panelGrid columns="11">
+                        <p:outputLabel value="Ordem:"/>
+                        <p:selectOneMenu id="ordem" value="#{controleAutor.dao.ordem}">
+                            <f:selectItem itemLabel="ID" itemValue="id"/>
+                            <f:selectItem itemLabel="Nome" itemValue="nome"/>
+                            <f:selectItem itemLabel="Bibliografia" itemValue="bibliografia"/>
+                            <p:ajax update="listagem"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Filtro:"/>
+                        <p:inputText value="#{controleAutor.dao.filtro}" size="15"
+                                     placeholder="Filtro">
+                            <p:ajax update="listagem" event="keyup" />
+                        </p:inputText>                            
+                        <p:commandButton value="Filtrar" update="listagem"/>
+                        <p:outputLabel value="Máximo de objetos: "/>
+                        <p:inputNumber value="#{controleAutor.dao.maximoObjetos}"
+                                       decimalPlaces="0" decimalSeparator="" size="4"
+                                       thousandSeparator=""/>                                                    
+                        <p:commandButton action="#{controleAutor.dao.primeiro()}"
+                                         icon="ui-icon-seek-first" title="Primeiro" update="listagem"/>
+                        <p:commandButton action="#{controleAutor.dao.anterior()}"
+                                         icon="ui-icon-seek-prev" title="Anterior" update="listagem"/>
+                        <p:commandButton action="#{controleAutor.dao.proximo()}"
+                                         icon="ui-icon-seek-next" title="Próximo" update="listagem"/>
+                        <p:commandButton action="#{controleAutor.dao.ultimo()}"
+                                         icon="ui-icon-seek-end" title="Ultimo" update="listagem"/>                        
+                    </p:panelGrid>
+                </div>
+                <p:dataTable value="#{controleAutor.dao.listaObjetos}" var="obj"
+                             id="listagem">
+                    <f:facet name="header">
+                        <p:outputLabel value="Listagem de Autores"/>
+                    </f:facet>
+                    <f:facet name="footer">
+                        <p:outputLabel value="#{controleAutor.dao.mensagemNavegacao}"/>
+                    </f:facet>
+                    <p:column headerText="ID">
+                        <p:outputLabel value="#{obj.id}"/>
+                    </p:column>
+                    <p:column headerText="Nome">
+                        <p:outputLabel value="#{obj.nome}"/>
+                    </p:column>
+                    <p:column headerText="Bibliografia">
+                        <p:outputLabel value="#{obj.bibliografia}" escape="false"/>
+                    </p:column>                                        
+                    <p:column headerText="Ações">
+                        <div align="center">
+                            <p:commandButton icon="ui-icon-pencil"
+                                             title="Editar"
+                                             actionListener="#{controleAutor.editar(obj.id)}"
+                                             update=":formEdicao"
+                                             oncomplete="PF('dlg').show();"/>
+                            <p:commandButton icon="ui-icon-trash" 
+                                             update=":formListagem"
+                                             title="Excluir"
+                                             actionListener="#{controleAutor.remover(obj.id)}"
+                                             onclick="if (!confirm('Confirma a exclusão?'))
+                                                         return false"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </ui:define>
+        <ui:define name="dialogos">
+            <p:dialog widgetVar="dlg" header="Edição" modal="true"
+                      resizable="false" position="center top">
+                <h:form id="formEdicao">
+                    <p:growl/>
+                    <div align="center">
+                        <p:panelGrid columns="2">
+                            <f:facet name="footer" >
+                                <div align="center">
+                                    <p:commandButton value="Salvar" icon="ui-icon-disk"
+                                                     actionListener="#{controleAutor.salvar()}"
+                                                     oncomplete="if(!args.validationFailed){PF('dlg').hide();}"
+                                                     update=":formEdicao :formListagem"/>
+                                </div>
+                            </f:facet>
+                            <f:facet name="header">
+                                <p:outputLabel value="Dados da Autor"/>
+                            </f:facet>
+                            <p:outputLabel value="ID"/>
+                            <p:inputText value="#{controleAutor.objeto.id}" size="10" readonly="true"/>
+                            <p:outputLabel value="Nome" for="txtNome"/>
+                            <p:inputText value="#{controleAutor.objeto.nome}"
+                                         id="txtNome" placeholder="Obrigatório"
+                                         size="40" maxlength="40"/>
+                            <p:outputLabel value="Bibliografia" for="txtBibliografia"/>
+                            <p:editor id="txtBibliografia" value="#{controleAutor.objeto.bibliografia}" 
+                                      width="500" height="250"/>             
+                        </p:panelGrid>
+                    </div>
+                </h:form>
+                <ui:include src="/templates/ajaxstatus.xhtml"/>
+            </p:dialog>
+        </ui:define>
+    </ui:composition>    
+</html>
